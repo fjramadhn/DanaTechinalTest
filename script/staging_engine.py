@@ -15,7 +15,7 @@ class ingestion():
         self.ingest_type = ingest_type
         self.user = os.environ.get("USER")
         self.cnx = cnx = create_engine("postgresql://ubuntu:ubuntu@localhost/airflow").connect()#postgresql://postgres:secret123@localhost").connect()
-        #postgresql://postgres:8Ag7AWYX9tbRMYG9@103.107.103.26").connect()
+
     
     def readDataFile(self, path):
         filename, filetype = os.path.splitext(path)
