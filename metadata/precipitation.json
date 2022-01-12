@@ -1,0 +1,24 @@
+[
+    {
+       "column_name":"date",
+       "column_type":"date",
+       "is_primary_key":true,
+       "is_unique":false,
+       "is_null_able":"NOT NULL"
+    },
+    {
+        "column_name":"precipitation",
+        "column_type":"float",
+        "is_primary_key":false,
+        "is_unique":false,
+        "is_null_able":"NULL"
+    },
+    {
+        "column_name":"precipitation_max",
+        "column_type":"float",
+        "is_primary_key":false,
+        "is_unique":false,
+        "is_null_able":"NULL"
+    }
+ ]
+ 
