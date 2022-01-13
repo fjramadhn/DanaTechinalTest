@@ -6,7 +6,7 @@ from os.path import dirname, abspath
 from airflow.models import Variable
 import json
 import pandas as pd
-import importlib, sys, os
+import sys, os
 
 default_args = {
     'owner': 'airflow',
