@@ -14,7 +14,7 @@ class ingestion():
         self.schema = pd.read_json(f'{dirname(dirname(abspath(__file__)))}/metadata/{self.tablename}.json')
         self.ingest_type = ingest_type
         self.user = os.environ.get("USER")
-        self.cnx = cnx = create_engine("postgresql://ubuntu:ubuntu@localhost/airflow").connect()#postgresql://postgres:secret123@localhost").connect()
+        self.cnx = create_engine("postgresql://ubuntu:ubuntu@localhost/airflow").connect()#postgresql://postgres:secret123@localhost").connect()
 
     
     def readDataFile(self, path):
@@ -32,14 +32,15 @@ class ingestion():
             query = queryDDL(self.schema, self.tablename, 'staging')
             self.cnx.execute(f"DROP TABLE IF EXISTS staging.{self.tablename};")
             self.cnx.execute(query)
+        else:
+            self.cnx.execute(f"TRUNCATE staging.{self.tablename};")
         a = 0
         for idx, df in enumerate(data):
             df = self.verifData(df)
-            current = "replace" if idx == 0 else "append"
             ingesttime = datetime.now()
             df["ingesttime"] = ingesttime
             df["ingestby"] = self.user #in case using ldap
-            df.to_sql(f"{self.tablename}", schema='staging', con=self.cnx, if_exists=current, index=False)
+            df.to_sql(f"{self.tablename}", schema='staging', con=self.cnx, if_exists='append', index=False)
             a += df.shape[0]
         resultdf = pd.read_sql(f"SELECT COUNT(1) as countsql FROM staging.{self.tablename}", con=self.cnx)
         resultdf["countdf"], resultdf["tablename"], resultdf["ingesttime"] = [a, self.tablename, datetime.now()]
@@ -75,7 +76,7 @@ class ingestion():
         ingesttime = datetime.now()
         query = f"""INSERT INTO ods.{self.tablename} ({columns}, ingesttime, ingestby)
                     SELECT {columns}, '{ingesttime}' as ingesttime, '{self.user}' as ingestby FROM staging.{self.tablename}
-                    ON CONFLICT (date) DO UPDATE SET {column_update};"""
+                    ON CONFLICT (date) DO UPDATE SET {column_update}, ingesttime=exclude.ingesttime, ingestby=exclude.ingestby;"""
         self.cnx.execute(query)
         resultdf = pd.read_sql(f"SELECT COUNT(1) as countsql FROM ods.{self.tablename} where ingesttime = '{ingesttime}' and ingestby = '{self.user}'", con=self.cnx)
         resultdf["tablename"], resultdf["ingesttime"] = [self.tablename, datetime.now()]

@@ -20,6 +20,8 @@ if __name__ == '__main__':
     data = framework.readDataFile(path_file)
     #ingestion process Staging
     result = framework.ingestStaging(data)
+    if result['countdf'][0] != result['countsql'][0]:
+        raise ValueError('Extracted Data has different amount with Loaded data')
     logger.info("Job finished. Data {} has been ingested into staging layer: {} rows".format(table_name, result['countdf'][0]))
     #ingestion process ODS
     result = framework.ingestODS()
